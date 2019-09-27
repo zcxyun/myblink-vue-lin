@@ -1,11 +1,11 @@
 <template>
   <div class="login">
     <div class="team-name">
-      <img src="@/assets/img/login/team-name.png" alt="">
+      <!-- <img src="@/assets/img/login/team-name.png" alt=""> -->
     </div>
     <div class="form-box" v-loading="loading" element-loading-background="rgba(0, 0, 0, 0)">
       <div class="title">
-        <h1 title="Lin">Lin CMS</h1>
+        <h1 title="Lin">Myblink CMS</h1>
       </div>
       <form class="login-form" autocomplete="off" @submit.prevent="throttleLogin()">
         <div class="form-item nickname">
