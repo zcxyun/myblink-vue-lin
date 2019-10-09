@@ -125,13 +125,12 @@ _axios.interceptors.response.use(async (res) => {
     // 处理 API 异常
     let { error_code, msg } = res.data // eslint-disable-line
     if (msg instanceof Object) {
-      let showMsg = ''
       Object.getOwnPropertyNames(msg).forEach((key, index) => {
         if (index === 0) {
-          showMsg = msg[key] // 如果是数组，展示第一条
+          const [showMsg] = msg[key] // 如果是数组，展示第一条
+          msg = showMsg
         }
       })
-      msg = showMsg
     }
     // 如果令牌无效或者是refreshToken相关异常
     if (error_code === 10000 || error_code === 10100) {

@@ -56,7 +56,7 @@
           <template slot-scope="props">
             <div class="summary">
               <img :src="props.row.thumb" alt>
-              <el-form label-position="left" inline class="demo-table-expand">
+              <el-form label-position="left" :inline="true" class="demo-table-expand">
                 <el-form-item label="电影名">
                   <span>{{ props.row.title }}</span>
                 </el-form-item>
@@ -114,7 +114,7 @@
           >
             <template slot-scope="props">
               <div v-if="!props.row.editFlag" class="table-edit">
-                <div @click="handleEdit(props.row)" class="content">{{ props.row.remark }}</div>
+                <div @click="handleCellEdit(props.row)" class="content">{{ props.row.remark }}</div>
                 <div class="cell-icon" @click="handleCellEdit(props.row)">
                   <i class="el-icon-edit"></i>
                 </div>

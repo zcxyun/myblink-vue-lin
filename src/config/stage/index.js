@@ -1,5 +1,9 @@
 import adminConfig from './admin'
 import bookConfig from './book' // 引入图书管理路由文件
+import movieConfig from './movie'
+import musicConfig from './music'
+import episodeConfig from './episode'
+import memberConfig from './member'
 import pluginsConfig from './plugins'
 import Utils from '@/lin/utils/util'
 
@@ -35,8 +39,12 @@ let homeRouter = [
     inNav: false,
     icon: 'iconfont icon-rizhiguanli',
   },
-  bookConfig,
   adminConfig,
+  bookConfig,
+  movieConfig,
+  musicConfig,
+  episodeConfig,
+  memberConfig,
 ]
 
 const plugins = [...pluginsConfig]
