@@ -370,8 +370,8 @@ export default {
         }
         // 提交更新数据
         const data = this._revertSingleData(row)
-        const res = await episode.editEpisode(data.id, data).catch((err) => {
-          row[prop].value = this.tempCellValue
+        const res = await episode.editEpisode(data.id, data).catch(() => {
+          row[prop].value = this.tempCellValue // eslint-disable-line
         })
         if (res && res.error_code === 0) {
           this.$message.success(`${res.msg}`)
@@ -418,7 +418,8 @@ export default {
         self.loading = false  // eslint-disable-line
         if (res && res.error_code === 0) {
           self.$message.success(res.msg)  // eslint-disable-line
-          self.tableData.splice(index, 1) // eslint-disable-line
+          // self.tableData.splice(index, 1) // eslint-disable-line
+          self._getTableData()
         }
       }).catch(() => {
         self.$message.info('已取消删除')  // eslint-disable-line
@@ -437,7 +438,7 @@ export default {
     // 返回并关闭编辑页面不刷新数据
     editBack() {
       this.showEdit = false
-    }
+    },
   },
 
   watch: {

@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="title">
-      <span>修改句子</span>
+      <span>编辑句子</span>
       <span class="back" @click="back">
         <i class="iconfont icon-fanhui"></i> 返回
       </span>

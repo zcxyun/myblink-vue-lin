@@ -7,13 +7,22 @@ import {
 } from '@/lin/plugins/axios'
 
 class Movie {
-  async addMovie(info) {
-    const res = await post('cms/movie/', info)
+  async getMovie(id) {
+    const res = await get(`cms/movie/${id}`)
     return res
   }
 
-  async getMovie(id) {
-    const res = await get(`cms/movie/${id}`)
+  async getMovies(page = 0, count = 1, q = null) {
+    const info = { page, count }
+    if (q) {
+      info.q = q
+    }
+    const res = await get('cms/movie', info)
+    return res
+  }
+
+  async addMovie(info) {
+    const res = await post('cms/movie', info)
     return res
   }
 
@@ -24,11 +33,6 @@ class Movie {
 
   async deleteMovie(id) {
     const res = await _delete(`cms/movie/${id}`)
-    return res
-  }
-
-  async getMovies() {
-    const res = await get('cms/movie/')
     return res
   }
 }
