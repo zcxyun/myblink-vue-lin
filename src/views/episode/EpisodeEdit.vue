@@ -112,7 +112,7 @@ export default {
       try {
         const imgData = await this.$refs.uploadEle.getValue()
         if (!imgData) {
-          this.$message.error('获取图像数据失败')
+          this.$message.error('还没有上传主图文件')
           return
         }
         const data = Object.assign(this.form, { img_id: imgData[0].imgId })
