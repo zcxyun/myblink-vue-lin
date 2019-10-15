@@ -89,22 +89,28 @@ export default {
   },
   methods: {
     async submitForm(formName) {
-      try {
-        const imgData = await this.$refs.uploadEle.getValue()
-        if (!imgData) {
-          this.$message.error('还没有上传主图文件')
+      this.$refs[formName].validate(async (valid) => {
+        if(!valid) {
           return
         }
-        const data = Object.assign(this.form, { img_id: imgData[0].imgId })
-        const res = await episode.addEpisode(data)
-        if (res.error_code === 0) {
-          this.$message.success(`${res.msg}`)
-          this.resetForm(formName)
-          this.$router.push('/episode/list')
+        try {
+          const imgData = await this.$refs.uploadEle.getValue()
+          const noImgData = (Array.isArray(imgData) && imgData.length === 0) || !imgData
+          if (noImgData) {
+            this.$message.error('还没有上传主图文件或图片不符合规则')
+            return
+          }
+          const data = Object.assign(this.form, { img_id: imgData[0].imgId })
+          const res = await episode.addEpisode(data)
+          if (res.error_code === 0) {
+            this.$message.success(`${res.msg}`)
+            this.resetForm(formName)
+            this.$router.push('/episode/list')
+          }
+        } catch (error) {
+          console.log(error)
         }
-      } catch (error) {
-        console.log(error)
-      }
+      })
     },
     // 重置表单
     resetForm(formName) {

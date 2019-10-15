@@ -245,17 +245,19 @@ export default {
       // 每次获取数据时设置单元格还没有被编辑
       this.cellEditing = false
       this.loading = true
-      const { total, episodes } = await episode.getEpisodes(page, count, q)
-        .catch(() => {
-          this.loading = false
-        })
+      try {
+        const { total, episodes } = await episode.getEpisodes(page, count, q)
+        this._handleData(total, episodes)
+      } catch (err) {
+        this.tableData = []
+        console.log(err)
+      }
       this.loading = false
-      this._handleData(total, episodes)
     },
 
     // 处理原表格数据, 使每个要显示的cell数据项等于{value: 原数据值, editFlag: false}
     _handleData(total, data) {
-      if (Array.isArray(data)) {
+      if (total && Array.isArray(data)) {
         data.forEach((item) => {
           const tempItem = item
           this.tableColumn.forEach((column) => {
@@ -418,7 +420,9 @@ export default {
         self.loading = false  // eslint-disable-line
         if (res && res.error_code === 0) {
           self.$message.success(res.msg)  // eslint-disable-line
-          // self.tableData.splice(index, 1) // eslint-disable-line
+          if (self.total_nums % self.pageCount === 1 && self.currentPage !== 1) {
+            self.currentPage--  // eslint-disable-line
+          }
           self._getTableData()
         }
       }).catch(() => {
@@ -427,6 +431,7 @@ export default {
     },
     // 搜索
     onQueryChange(query) {
+      this.currentPage = 1
       this.searchKeyword = query
       this._getTableData()
     },

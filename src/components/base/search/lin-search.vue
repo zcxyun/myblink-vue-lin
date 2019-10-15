@@ -1,7 +1,13 @@
 <template>
   <div class="lin-search">
-    <el-input size="medium"  :placeholder="placeholder" clearable v-model="keyword" class="input-with-select">
-      <el-button slot="append" icon="el-icon-search"></el-button>
+    <el-input
+      size="medium"
+      :placeholder="placeholder"
+      clearable
+      v-model="keyword"
+      class="input-with-select"
+    >
+      <el-button slot="append" icon="el-icon-search" @click="onSearch(keyword)"></el-button>
     </el-input>
   </div>
 </template>
@@ -18,21 +24,21 @@ export default {
   },
   data() {
     return {
+      debounceSearch: null,
       keyword: '',
     }
   },
   created() {
+    this.debounceSearch = Utils.debounce(this.onSearch, 1000)
     // 节流搜索
-    this.$watch(
-      'keyword',
-      Utils.debounce((newQuery) => {
-        this.$emit('query', newQuery)
-      }, 1000),
-    )
+    this.$watch('keyword', this.debounceSearch)
   },
   methods: {
     clear() {
       this.keyword = ''
+    },
+    onSearch(newQuery) {
+      this.$emit('query', newQuery)
     },
   },
 }
@@ -57,7 +63,7 @@ export default {
 
   &:focus {
     width: 250px;
-    transition: all 0.3s linear;
+    // transition: all 0.3s linear;
   }
 }
 </style>

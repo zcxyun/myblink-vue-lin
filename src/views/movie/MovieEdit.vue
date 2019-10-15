@@ -109,22 +109,29 @@ export default {
       })
     },
     async submitForm(formName) {
-      try {
-        const imgData = await this.$refs.uploadEle.getValue()
-        if (!imgData) {
-          this.$message.error('还没有上传主图文件')
+      this.$refs[formName].validate(async (valid) => {
+        if (!valid) {
           return
         }
-        const data = Object.assign(this.form, { img_id: imgData[0].imgId })
-        const res = await movie.editMovie(this.editId, data)
-        if (res.error_code === 0) {
-          this.$message.success(`${res.msg}`)
-          this.resetForm(formName)
-          this.$emit('edit-save')
+        try {
+          const imgData = await this.$refs.uploadEle.getValue()
+          // 还没有上传时imgData == [], 上传校验失败时为false
+          const noImgData = (Array.isArray(imgData) && imgData.length === 0) || !imgData
+          if (noImgData) {
+            this.$message.error('还没有上传主图文件或图片不符合规则')
+            return
+          }
+          const data = Object.assign(this.form, { img_id: imgData[0].imgId })
+          const res = await movie.editMovie(this.editId, data)
+          if (res.error_code === 0) {
+            this.$message.success(`${res.msg}`)
+            this.resetForm(formName)
+            this.$emit('edit-save')
+          }
+        } catch (error) {
+          console.log(error)
         }
-      } catch (error) {
-        console.log(error)
-      }
+      })
     },
     // 重置表单
     resetForm(formName) {

@@ -119,30 +119,36 @@ export default {
   },
   methods: {
     async submitForm(formName) {
-      try {
-        const imgData = await this.$refs.uploadImg.getValue()
-        if (!imgData) {
-          this.$message.error('还没有上传主图文件')
+      this.$refs[formName].validate(async (valid) => {
+        if (!valid) {
           return
         }
-        if (!this.voiceId) {
-          this.$message.error('还没有上传音频文件')
-          return
+        try {
+          const imgData = await this.$refs.uploadImg.getValue()
+          const noImgData = (Array.isArray(imgData) && imgData.length === 0) || !imgData
+          if (noImgData) {
+            this.$message.error('还没有上传主图文件或图片不符合规则')
+            return
+          }
+          if (!this.voiceId) {
+            this.$message.error('还没有上传音频文件')
+            return
+          }
+          const data = Object.assign(
+            this.form,
+            { img_id: imgData[0].imgId },
+            { voice_id: this.voiceId },
+          )
+          const res = await music.addMusic(data)
+          if (res.error_code === 0) {
+            this.$message.success(`${res.msg}`)
+            this.resetForm(formName)
+            this.$router.push('/music/list')
+          }
+        } catch (error) {
+          console.log(error)
         }
-        const data = Object.assign(
-          this.form,
-          { img_id: imgData[0].imgId },
-          { voice_id: this.voiceId },
-        )
-        const res = await music.addMusic(data)
-        if (res.error_code === 0) {
-          this.$message.success(`${res.msg}`)
-          this.resetForm(formName)
-          this.$router.push('/music/list')
-        }
-      } catch (error) {
-        console.log(error)
-      }
+      })
     },
     // 重置表单
     resetForm(formName) {
