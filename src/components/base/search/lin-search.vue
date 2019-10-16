@@ -63,7 +63,7 @@ export default {
 
   &:focus {
     width: 250px;
-    // transition: all 0.3s linear;
+    transition: all 0.3s linear;
   }
 }
 </style>

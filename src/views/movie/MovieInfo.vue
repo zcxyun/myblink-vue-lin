@@ -1,8 +1,8 @@
 <template>
   <div class="container">
     <div class="title">
-      <span>编辑句子</span>
-      <span class="back" @click="back">
+      <span>{{title}}</span>
+      <span class="back" @click="back" v-if="action === 'edit'">
         <i class="iconfont icon-fanhui"></i> 返回
       </span>
     </div>
@@ -24,7 +24,7 @@
               <el-input
                 size="medium"
                 v-model="form.title"
-                placeholder="请填写标题"
+                placeholder="请填写电影标题"
                 maxlength="30"
                 show-word-limit
               ></el-input>
@@ -37,12 +37,12 @@
                 :max-num="1"
               />
             </el-form-item>
-            <el-form-item label="简介" prop="summary">
+            <el-form-item label="摘要" prop="summary">
               <el-input
                 size="medium"
                 type="textarea"
                 :autosize="{ minRows: 2, maxRows: 3}"
-                placeholder="请输入简介"
+                placeholder="请填写电影摘要"
                 maxlength="50"
                 show-word-limit
                 v-model="form.summary">
@@ -62,12 +62,16 @@
 </template>
 
 <script>
-import episode from '@/models/episode'
+import movie from '@/models/movie.js'
 import UploadImgs from '@/components/base/upload-imgs'
 
 export default {
   props: {
-    editEpisodeId: Number,
+    editMovieId: Number,
+    action: {
+      type: String,
+      default: 'edit',
+    },
   },
   components: {
     UploadImgs,
@@ -78,6 +82,7 @@ export default {
         title: '',
         summary: '',
       },
+      originInfo: null,
       rules: {
         title: [
           { required: true, message: '请输入标题', trigger: 'blur' }, // eslint-disable-line
@@ -95,18 +100,33 @@ export default {
       imgInitData: [],
     }
   },
-  mounted() {
+  computed: {
+    title() {
+      return this.action === 'edit' ? '编辑电影' : '添加电影'
+    },
+  },
+  created() {
     this.initData()
   },
   methods: {
     async initData() {
-      const res = await episode.getEpisode(this.editEpisodeId)
-      this.form = res
-      this.imgInitData.push({
-        id: res.img_id,
-        imgId: res.img_id,
-        display: res.img_url,
-      })
+      if (this.action === 'edit' && this.editMovieId) {
+        this.originInfo = await movie.getMovie(this.editMovieId)
+        this.setInfo()
+      }
+    },
+    setInfo() {
+      const origin = this.originInfo  // eslint-disable-line
+      this.form.title = origin.title || ''
+      this.form.summary = origin.summary || ''
+      if (origin.img_id && origin.img_url) {
+        this.imgInitData.splice(0)
+        this.imgInitData.push({
+          id: origin.img_id,
+          imgId: origin.img_id,
+          display: origin.img_url,
+        })
+      }
     },
     async submitForm(formName) {
       this.$refs[formName].validate(async (valid) => {
@@ -121,7 +141,12 @@ export default {
             return
           }
           const data = Object.assign(this.form, { img_id: imgData[0].imgId })
-          const res = await episode.editEpisode(this.editEpisodeId, data)
+          let res = null
+          if (this.editMovieId) {
+            res = await movie.editMovie(this.editMovieId, data)
+          } else {
+            res = await movie.addMovie(data)
+          }
           if (res.error_code === 0) {
             this.$message.success(`${res.msg}`)
             this.resetForm(formName)
@@ -134,7 +159,12 @@ export default {
     },
     // 重置表单
     resetForm(formName) {
-      this.$refs[formName].resetFields()
+      if (this.action === 'edit') {
+        this.setInfo()
+      } else {
+        this.$refs[formName].resetFields()
+        this.imgInitData.splice(0)
+      }
     },
     back() {
       this.$emit('edit-back')
@@ -152,6 +182,7 @@ export default {
     font-size: 16px;
     font-weight: 500;
     text-indent: 40px;
+    border-bottom: 1px solid #dae1ec;
 
     .back {
       float: right;
@@ -159,7 +190,6 @@ export default {
       cursor: pointer;
     }
   }
-
 
   .wrap {
     padding: 20px;

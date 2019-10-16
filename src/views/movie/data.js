@@ -14,4 +14,7 @@ export const tableColumn = [
   { prop: 'summary', label: '摘要', width: 400 },
 ]
 
-export const a = 1
+export const operate = [
+  { name: '编辑', func: 'handleEdit', type: 'primary' },
+  { name: '删除', func: 'handleDelete', type: 'danger' },
+]

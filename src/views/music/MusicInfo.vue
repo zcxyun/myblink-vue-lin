@@ -1,8 +1,8 @@
 <template>
   <div class="container">
     <div class="title">
-      <span>编辑电影</span>
-      <span class="back" @click="back">
+      <span>{{title}}</span>
+      <span class="back" @click="back" v-if="action==='edit'">
         <i class="iconfont icon-fanhui"></i> 返回
       </span>
     </div>
@@ -24,14 +24,14 @@
               <el-input
                 size="medium"
                 v-model="form.title"
-                placeholder="请填写标题"
+                placeholder="请填写音乐标题"
                 maxlength="30"
                 show-word-limit
               ></el-input>
             </el-form-item>
             <el-form-item label="主图">
               <upload-imgs
-                ref="uploadEle"
+                ref="imgUpload"
                 :value="imgInitData"
                 :rules="imgRules"
                 :max-num="1"
@@ -57,12 +57,12 @@
                 <div slot="tip" class="el-upload__tip">只能上传一个mp3文件，且不超过10MB</div>
               </el-upload>
             </el-form-item>
-            <el-form-item label="简介" prop="summary">
+            <el-form-item label="摘要" prop="summary">
               <el-input
                 size="medium"
                 type="textarea"
                 :autosize="{ minRows: 2, maxRows: 3}"
-                placeholder="请输入简介"
+                placeholder="请填写音乐摘要"
                 maxlength="50"
                 show-word-limit
                 v-model="form.summary">
@@ -90,13 +90,24 @@ import Config from '@/config'
 
 export default {
   props: {
-    editId: Number,
+    editMusicId: Number,
+    action: {
+      type: String,
+      default: 'edit',
+    },
   },
   components: {
     UploadImgs,
   },
+  computed: {
+    title() {
+      return this.action === 'edit' ? '编辑音乐' : '添加音乐'
+    },
+  },
   data() {
     return {
+      // 编辑页面时从服务器请求的指定ID的原始数据
+      originInfo: null,
       // 表单相关
       form: {
         title: '',
@@ -104,11 +115,11 @@ export default {
       },
       rules: {
         title: [
-          { required: true, message: '请输入标题', trigger: 'blur' }, // eslint-disable-line
+          { required: true, message: '请输入音乐标题', trigger: 'blur' }, // eslint-disable-line
           { min: 1, max: 30, message: '标题长度是1 - 30个字符', trigger: 'blur' },  // eslint-disable-line
         ],
         summary: [
-          { required: true, message: '请输入摘要', trigger: 'blur' }, // eslint-disable-line
+          { required: true, message: '请输入音乐摘要', trigger: 'blur' }, // eslint-disable-line
           { min: 1, max: 50, message: '摘要长度是1 - 50个字符', trigger: 'blur' },  // eslint-disable-line
         ],
       },
@@ -129,31 +140,53 @@ export default {
       voiceList: [],
     }
   },
-  mounted() {
+  created() {
     this.initData()
   },
   methods: {
     async initData() {
-      const res = await music.getMusic(this.editId)
-      this.form = res
-      this.imgInitData.push({
-        id: res.img_id,
-        imgId: res.img_id,
-        display: res.img_url,
-      })
-      this.voiceList.push({
-        name: res.title,
-        url: res.voice_url,
-      })
-      this.voiceId = res.voice_id
+      if (this.action === 'edit' && this.editMusicId) {
+        this.originInfo = await music.getMusic(this.editMusicId)
+        this.setFormInfo()
+        this.setImgInfo()
+        this.setVoiceInfo()
+      }
     },
+    setFormInfo() {
+      const origin = this.originInfo  // eslint-disable-line
+      this.form.title = origin.title || ''
+      this.form.summary = origin.summary || ''
+    },
+    setImgInfo() {
+      const origin = this.originInfo  // eslint-disable-line
+      if (origin.img_id && origin.img_url) {
+        this.imgInitData.splice(0)
+        this.imgInitData.push({
+          id: origin.img_id,
+          imgId: origin.img_id,
+          display: origin.img_url,
+        })
+      }
+    },
+    setVoiceInfo() {
+      const origin = this.originInfo  // eslint-disable-line
+      if (origin.title && origin.voice_url && origin.voice_id) {
+        this.voiceList.splice(0)
+        this.voiceList.push({
+          name: origin.title,
+          url: origin.voice_url,
+        })
+        this.voiceId = origin.voice_id
+      }
+    },
+
     async submitForm(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (!valid) {
           return
         }
         try {
-          const imgData = await this.$refs.uploadEle.getValue()
+          const imgData = await this.$refs.imgUpload.getValue()
           const noImgData = (Array.isArray(imgData) && imgData.length === 0) || !imgData
           if (noImgData) {
             this.$message.error('还没有上传主图文件或图片不符合规则')
@@ -168,7 +201,12 @@ export default {
             { img_id: imgData[0].imgId },
             { voice_id: this.voiceId },
           )
-          const res = await music.editMusic(this.editId, data)
+          let res = null
+          if (this.editMusicId) {
+            res = await music.editMusic(this.editMusicId, data)
+          } else {
+            res = await music.addMusic(data)
+          }
           if (res.error_code === 0) {
             this.$message.success(`${res.msg}`)
             this.resetForm(formName)
@@ -181,7 +219,18 @@ export default {
     },
     // 重置表单
     resetForm(formName) {
-      this.$refs[formName].resetFields()
+      if (this.action === 'edit') {
+        this.setFormInfo()
+        this.setImgInfo()
+        this.setVoiceInfo()
+      } else {
+        this.$refs[formName].resetFields()
+        this.imgInitData.splice(0)
+        this.voiceList.splice(0)
+        this.voiceId = 0
+        // this.$refs.imgUpload.clear()
+        // this.$refs.voiceUpload.clearFiles()
+      }
     },
     back() {
       this.$emit('edit-back')
