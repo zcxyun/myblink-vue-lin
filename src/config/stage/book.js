@@ -8,15 +8,15 @@ const bookRouter = {
   order: null,
   inNav: true,
   children: [
-    {
-      title: '添加图书',
-      type: 'view',
-      name: 'bookAdd',
-      route: '/book/add',
-      filePath: 'views/book/BookAdd.vue',
-      inNav: true,
-      icon: 'iconfont icon-tushuguanli',
-    },
+    // {
+    //   title: '添加图书',
+    //   type: 'view',
+    //   name: 'bookAdd',
+    //   route: '/book/add',
+    //   filePath: 'views/book/BookAdd.vue',
+    //   inNav: true,
+    //   icon: 'iconfont icon-tushuguanli',
+    // },
     {
       title: '图书列表',
       type: 'view',

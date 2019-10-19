@@ -1,6 +1,9 @@
 export const tableColumn = [
   // { prop: 'sorting', label: '排序', noRepeat: true },
   // { prop: 'rank', label: '排名' },
+  {
+    prop: 'img_url', label: '封面', width: 100, readOnly: true,
+  },
   { prop: 'title', label: '标题', width: 300 },
   // { prop: 'originalTitle', label: '原名', width: 150 },
   // {

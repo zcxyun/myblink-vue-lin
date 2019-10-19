@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-loading="loading">
     <div class="title">
       <span>{{title}}</span>
       <span class="back" @click="back" v-if="action==='edit'">
@@ -106,6 +106,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       // 编辑页面时从服务器请求的指定ID的原始数据
       originInfo: null,
       // 表单相关
@@ -146,10 +147,16 @@ export default {
   methods: {
     async initData() {
       if (this.action === 'edit' && this.editMusicId) {
-        this.originInfo = await music.getMusic(this.editMusicId)
-        this.setFormInfo()
-        this.setImgInfo()
-        this.setVoiceInfo()
+        this.loading = true
+        try {
+          this.originInfo = await music.getMusic(this.editMusicId)
+          this.setFormInfo()
+          this.setImgInfo()
+          this.setVoiceInfo()
+        } catch (err) {
+          console.log(err)
+        }
+        this.loading = false
       }
     },
     setFormInfo() {
@@ -160,7 +167,7 @@ export default {
     setImgInfo() {
       const origin = this.originInfo  // eslint-disable-line
       if (origin.img_id && origin.img_url) {
-        this.imgInitData.splice(0)
+        this.imgInitData.splice(0) // 重置时先清空, 要不然会越来越多~_~
         this.imgInitData.push({
           id: origin.img_id,
           imgId: origin.img_id,
@@ -171,7 +178,7 @@ export default {
     setVoiceInfo() {
       const origin = this.originInfo  // eslint-disable-line
       if (origin.title && origin.voice_url && origin.voice_id) {
-        this.voiceList.splice(0)
+        this.voiceList.splice(0) // 重置时先清空, 要不然会越来越多~_~
         this.voiceList.push({
           name: origin.title,
           url: origin.voice_url,
@@ -219,15 +226,23 @@ export default {
     },
     // 重置表单
     resetForm(formName) {
+      // 编辑状态时重置 = 恢复原数据
       if (this.action === 'edit') {
         this.setFormInfo()
         this.setImgInfo()
         this.setVoiceInfo()
       } else {
+        // 其他状态时清空时(如添加) = 清除表单数据
         this.$refs[formName].resetFields()
         this.imgInitData.splice(0)
         this.voiceList.splice(0)
+        /**
+         * 音频列表清空时 voiceId 置为0 是因为上传之后不提交而重置会使数据清空的同时 voiceId != 0
+         * 而voiceId != 0 会使第二次提交表单数据时不上传音频文件也可以提交数据,不过提交的是上次重置
+         * 表单时清空的音频文件voiceId
+         */
         this.voiceId = 0
+        // 不知道为什么不起作用(下面)
         // this.$refs.imgUpload.clear()
         // this.$refs.voiceUpload.clearFiles()
       }

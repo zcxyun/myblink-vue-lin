@@ -50,17 +50,24 @@
           @row-dblclick="rowClick"
           @expand-change="expandChange"
           v-loading="loading"
-          id="out-table'"
         >
           <!-- 展示摘要 -->
           <el-table-column type="expand">
             <template #default="{row}">
               <div class="summary">
-                <img :src="row.img_url" v-if="row.img_url" alt>
-                <el-form label-position="left" class="demo-table-expand">
+                <el-image
+                  v-if="row.img_url || row.image"
+                  :src="row.img_url || row.image"
+                  style="width: 250px; height: 200px"
+                  fit="contain"
+                  @click.native="onImage(row.img_url || row.image)"></el-image>
+                <el-form label-position="right" class="demo-table-expand" size="mini">
                   <template v-for="column in filterTableColumn">
-                    <el-form-item :label="column.label" :key="column.prop">
-                      <span>{{ row[column.prop].value }}</span>
+                    <el-form-item
+                      :label="column.label"
+                      :key="column.prop"
+                      v-if="!column.readOnly && row[column.prop].value">
+                      <div style="width: 550px">{{ row[column.prop].value }}</div>
                     </el-form-item>
                   </template>
                   <el-form-item v-if="row.voice_url">
@@ -86,15 +93,22 @@
               </template>
             </el-table-column> -->
             <!-- 正常表单列 -->
-            <!-- <el-table-column
-              v-bind:key="item.label"
-              v-if="!item.noRepeat"
-              :prop="item.prop"
-              :label="item.label"
-              :show-overflow-tooltip="true"
-              :fixed="item.fixed ? item.fixed : false"
-              :width="item.width ? item.width : ''"
-            ></el-table-column> -->
+            <el-table-column
+              :key="column.label"
+              v-if="(column.prop === 'image' || column.prop === 'img_url')  && column.readOnly"
+              :label="column.label"
+              :fixed="column.fixed ? column.fixed : false"
+              :width="column.width ? column.width : ''"
+            >
+              <template #default="{row}">
+                <el-image
+                  v-if="row.img_url || row.image"
+                  :src="row.img_url || row.image"
+                  fit="contain"
+                  @click.native="onImage(row.img_url || row.image)"
+                  ></el-image>
+              </template>
+            </el-table-column>
             <!-- 排序 评分 -->
             <!-- <el-table-column
               label="评分"
@@ -107,15 +121,17 @@
             ></el-table-column> -->
             <!-- 单元格编辑 -->
             <el-table-column
+              v-else
               :key="column.label"
               :label="column.label"
-              :width="column.width"
+              :width="column.width ? column.width : ''"
+              :fixed="column.fixed ? column.fixed : false"
               show-overflow-tooltip
             >
               <template v-slot="{ row }">
                 <div v-if="!row[column.prop].editFlag" class="table-edit">
                   <div @click="handleCellEdit(row, column)" class="content">{{ row[column.prop].value }}</div>
-                  <div class="cell-icon" @click="handleCellEdit(row, column)">
+                  <div class="cell-icon" @click="handleCellEdit(row, column)" v-if="operate">
                     <i class="el-icon-edit"></i>
                   </div>
                 </div>
@@ -148,7 +164,7 @@
             </el-table-column> -->
           </template>
           <!-- 操作列 -->
-          <el-table-column label="操作" fixed="right" width="170">
+          <el-table-column label="操作" fixed="right" width="170" v-if="operate">
             <template slot-scope="scope">
               <el-button
                 v-for="(item,index) in operate"
@@ -226,7 +242,7 @@ export default {
           const tempItem = item
           this.tableColumn.forEach((column) => {
             const { prop } = column
-            if (prop in tempItem) {
+            if (prop in tempItem && prop !== 'image' && prop !== 'img_url') {
               const origin = tempItem[prop]
               tempItem[prop] = {
                 value: origin,
@@ -307,6 +323,10 @@ export default {
 
     // 单元格编辑
     handleCellEdit(row, column) {
+      // 没有输入操作列, 单元格不可编辑
+      if (!this.operate) {
+        return
+      }
       if (this.cellEditing === true) {
         this.$message.warning('一次只能编辑一个单元格')
         return
@@ -383,6 +403,9 @@ export default {
     // 搜索
     onQueryChange(query) {
       this.$emit('search', query)
+    },
+    onImage(image) {
+      this.$imagePreview({images: [image]})
     },
   },
 

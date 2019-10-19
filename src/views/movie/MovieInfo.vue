@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-loading="loading">
     <div class="title">
       <span>{{title}}</span>
       <span class="back" @click="back" v-if="action === 'edit'">
@@ -98,6 +98,7 @@ export default {
         minHeight: 100,
       },
       imgInitData: [],
+      loading: false,
     }
   },
   computed: {
@@ -111,8 +112,14 @@ export default {
   methods: {
     async initData() {
       if (this.action === 'edit' && this.editMovieId) {
-        this.originInfo = await movie.getMovie(this.editMovieId)
-        this.setInfo()
+        this.loading = true
+        try {
+          this.originInfo = await movie.getMovie(this.editMovieId)
+          this.setInfo()
+        } catch (err) {
+          console.log(err)
+        }
+        this.loading = false
       }
     },
     setInfo() {
