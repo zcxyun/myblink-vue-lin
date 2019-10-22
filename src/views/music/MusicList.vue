@@ -3,6 +3,7 @@
     <z-table
       v-if="!showEdit"
       :loading="loading"
+      showExtend
       :title="title"
       :searchPlaceHolder="searchPlaceHolder"
       :tableData="tableData"

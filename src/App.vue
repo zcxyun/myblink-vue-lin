@@ -59,4 +59,8 @@ export default {
     transition: color 99999s ease-out, background-color 99999s ease-out;
   }
 }
+
+.el-tooltip__popper{
+  max-width: 500px;
+}
 </style>

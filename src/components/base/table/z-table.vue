@@ -2,17 +2,17 @@
   <div>
     <!-- 列表页面 -->
     <div class="tableSample">
-        <div class="header">
-          <div class="header-left">
-            <p class="title">{{title}}</p>
-          </div>
-          <div class="header-right">
-            <lin-search @query="onQueryChange" :placeholder="searchPlaceHolder"/>
-            <div style="margin-left:30px">
-              <el-button type="primary" @click="dialogTableVisible=!dialogTableVisible">列操作</el-button>
-            </div>
+      <div class="header">
+        <div class="header-left">
+          <p class="title">{{title}}</p>
+        </div>
+        <div class="header-right">
+          <lin-search @query="onQueryChange" :placeholder="searchPlaceHolder"/>
+          <div style="margin-left:30px">
+            <el-button type="primary" @click="dialogTableVisible=!dialogTableVisible">列操作</el-button>
           </div>
         </div>
+      </div>
       <div class="table-main">
         <el-dialog top="5vh" width="60%" :visible.sync="dialogTableVisible">
           <!-- 定制列 -->
@@ -47,40 +47,59 @@
         </el-dialog>
         <el-table
           :data="_tableData"
-          @row-dblclick="rowClick"
-          @expand-change="expandChange"
+          @row-dblclick="onRowDbClick"
+          @expand-change="onExpandChange"
           v-loading="loading"
+          highlight-current-row
+          stripe
+          max-height="420"
         >
           <!-- 展示摘要 -->
-          <el-table-column type="expand">
+          <el-table-column type="expand" v-if="showExtend">
             <template #default="{row}">
               <div class="summary">
-                <el-image
-                  v-if="row.img_url || row.image"
-                  :src="row.img_url || row.image"
-                  style="width: 250px; height: 200px"
-                  fit="contain"
-                  @click.native="onImage(row.img_url || row.image)"></el-image>
-                <el-form label-position="right" class="demo-table-expand" size="mini">
+                <template v-for="column in filterTableColumn">
+                  <el-image
+                    :key="column.label"
+                    v-if="column.label === '图片'"
+                    :src="row[column.prop].value"
+                    fit="contain"
+                    class="summary-img"
+                    @click.native="onImage(row[column.prop].value)">
+                  </el-image>
+                </template>
+                <el-form label-position="right" class="table-expand" size="mini">
                   <template v-for="column in filterTableColumn">
                     <el-form-item
+                      v-if="column.label === '音乐'"
+                      :key="column.label">
+                      <el-link :href="row[column.prop].value" target="_blank" >
+                        <i class="el-icon-view el-icon--left"></i>音乐地址
+                      </el-link>
+                    </el-form-item>
+                    <el-form-item
                       :label="column.label"
-                      :key="column.prop"
-                      v-if="!column.readOnly && row[column.prop].value">
-                      <div style="width: 550px">{{ row[column.prop].value }}</div>
+                      :key="column.label"
+                      v-else-if="column.label !== '图片' && row[column.prop].value">
+                      <div class="form-item">       {{ row[column.prop].value }}</div>
                     </el-form-item>
                   </template>
-                  <el-form-item v-if="row.voice_url">
-                    <el-link :href="row.voice_url" target="_blank" >
-                      <i class="el-icon-view el-icon--left"></i>音乐地址
-                    </el-link>
-                  </el-form-item>
                 </el-form>
               </div>
             </template>
           </el-table-column>
           <!-- 开始循环 -->
           <template v-for="column in filterTableColumn">
+            <!-- 推荐 -->
+            <!-- <el-table-column label="推荐" v-if="column.label === '推荐'" :key="column.label">
+              <template #default="{row}">
+                <el-switch
+                  v-model=""
+                  active-color="#3963bc"
+                  @change="onSwitch()"
+                ></el-switch>
+              </template>
+            </el-table-column> -->
             <!-- 自定义排序 -->
             <!-- <el-table-column label="排序" v-if="item.label === '排序'" v-bind:key="item.label">
               <template slot-scope="props">
@@ -88,25 +107,38 @@
                   type="number"
                   class="sort-input"
                   v-model="props.row.sorting"
-                  @blur="handleSort(props.row.sorting, props.row)"
+                  @blur="onSort(props.row.sorting, props.row)"
                 >
               </template>
             </el-table-column> -->
-            <!-- 正常表单列 -->
+            <!-- 首列图片 -->
             <el-table-column
               :key="column.label"
-              v-if="(column.prop === 'image' || column.prop === 'img_url')  && column.readOnly"
+              v-if="column.label === '图片'"
               :label="column.label"
               :fixed="column.fixed ? column.fixed : false"
               :width="column.width ? column.width : ''"
             >
               <template #default="{row}">
                 <el-image
-                  v-if="row.img_url || row.image"
-                  :src="row.img_url || row.image"
+                  :src="row[column.prop].value"
                   fit="contain"
-                  @click.native="onImage(row.img_url || row.image)"
+                  @click.native="onImage(row[column.prop].value)"
                   ></el-image>
+              </template>
+            </el-table-column>
+            <!-- 音乐链接列 -->
+            <el-table-column
+              :key="column.label"
+              v-else-if="column.label === '音乐'"
+              :label="column.label"
+              :fixed="column.fixed ? column.fixed : false"
+              :width="column.width ? column.width : ''"
+            >
+              <template #default="{row}">
+                <el-link :href="row[column.prop].value" target="_blank" >
+                  <i class="el-icon-view el-icon--left"></i>音乐地址
+                </el-link>
               </template>
             </el-table-column>
             <!-- 排序 评分 -->
@@ -124,14 +156,15 @@
               v-else
               :key="column.label"
               :label="column.label"
+              :prop="column.prop"
               :width="column.width ? column.width : ''"
               :fixed="column.fixed ? column.fixed : false"
               show-overflow-tooltip
             >
-              <template v-slot="{ row }">
+              <template #default="{ row }">
                 <div v-if="!row[column.prop].editFlag" class="table-edit">
-                  <div @click="handleCellEdit(row, column)" class="content">{{ row[column.prop].value }}</div>
-                  <div class="cell-icon" @click="handleCellEdit(row, column)" v-if="operate">
+                  <div @click="onCellEdit(row, column)" class="content">{{ row[column.prop].value || '暂无数据' }}</div>
+                  <div class="cell-icon" @click="onCellEdit(row, column)" v-if="operate">
                     <i class="el-icon-edit"></i>
                   </div>
                 </div>
@@ -142,24 +175,14 @@
                     :ref="column.prop + '-' + row.id"
                   ></el-input>
                   <div class="cell-icon-edit">
-                    <div class="cell-save" @click="handleCellSave(row, column)">
+                    <div class="cell-save" @click="onCellSave(row, column)">
                       <i class="el-icon-check"></i>
                     </div>
-                    <div class="cell-cancel" @click="handleCellCancel(row, column)">
+                    <div class="cell-cancel" @click="onCellCancel(row, column)">
                       <i class="el-icon-close"></i>
                     </div>
                   </div>
                 </div>
-              </template>
-            </el-table-column> -->
-            <!-- 推荐 -->
-            <!-- <el-table-column label="推荐" v-if="item.label === '推荐'" v-bind:key="item.label">
-              <template slot-scope="props">
-                <el-switch
-                  v-model="props.row.recommend"
-                  active-color="#3963bc"
-                  @change="handleRecommend($event, props.row)"
-                ></el-switch>
               </template>
             </el-table-column> -->
           </template>
@@ -181,7 +204,7 @@
         <!-- 分页 -->
         <div class="pagination">
           <el-pagination
-            @current-change="handleCurrentChange"
+            @current-change="onCurrentChange"
             :background="true"
             :page-size="pageCount"
             :current-page="currentPage"
@@ -209,6 +232,7 @@ export default {
     tableData: Array,
     tableColumn: Array,
     operate: Array,
+    showExtend: Boolean,
     // 分页相关
     currentPage: Number, // 默认获取第一页的数据
     pageCount: Number, // 每页10条数据
@@ -242,10 +266,9 @@ export default {
           const tempItem = item
           this.tableColumn.forEach((column) => {
             const { prop } = column
-            if (prop in tempItem && prop !== 'image' && prop !== 'img_url') {
-              const origin = tempItem[prop]
+            if (prop in tempItem) {
               tempItem[prop] = {
-                value: origin,
+                value: tempItem[prop],
                 editFlat: false,
               }
             }
@@ -279,50 +302,33 @@ export default {
       }
     },
 
-    rowClick(val) {
-      console.log(val)
+    onRowDbClick(val) {
+      // console.log(val)
       this.$emit('row-click', val)
     },
 
     // 变更排序
-    handleSort(val, rowData) {
-      console.log('rowData', rowData)
+    onSort(val, rowData) {
+      // console.log('rowData', rowData)
       this.$message({
         type: 'success',
         message: `排序已更改为：${val}`,
       })
     },
 
-    // 推荐
-    handleRecommend(val, rowData) {
+    // 切换状态
+    onSwitch(val, rowData) {
       this.loading = true
-      console.log(val, rowData)
-      if (val) {
-        setTimeout(() => {
-          this.loading = false
-          this.$message({
-            type: 'success',
-            message: '推荐成功',
-          })
-        }, 1000)
-      } else {
-        setTimeout(() => {
-          this.loading = false
-          this.$message({
-            type: 'success',
-            message: '取消推荐',
-          })
-        }, 1000)
-      }
+      // console.log(val, rowData)
     },
 
-    expandChange(row, expandedRows) {
-      console.log(row, expandedRows)
+    onExpandChange(row, expandedRows) {
+      // console.log(row, expandedRows)
       this.$emit('expand-change', { row, expandedRows })
     },
 
     // 单元格编辑
-    handleCellEdit(row, column) {
+    onCellEdit(row, column) {
       // 没有输入操作列, 单元格不可编辑
       if (!this.operate) {
         return
@@ -347,7 +353,7 @@ export default {
     },
 
     // 单元格保存
-    async handleCellSave(row, column) {
+    async onCellSave(row, column) {
       const { prop } = column
       if (prop in row) {
         const cell = row[prop]
@@ -370,7 +376,7 @@ export default {
     },
 
     // 单元格取消编辑
-    handleCellCancel(row, column) {
+    onCellCancel(row, column) {
       const { prop } = column
       if (prop in row) {
         this.$set(row[prop], 'editFlag', false)
@@ -382,7 +388,7 @@ export default {
     },
 
     // 切换分页
-    async handleCurrentChange(val) {
+    async onCurrentChange(val) {
       this.$emit('page-change', val)
     },
 
@@ -404,8 +410,9 @@ export default {
     onQueryChange(query) {
       this.$emit('search', query)
     },
+    // 预览图片
     onImage(image) {
-      this.$imagePreview({images: [image]})
+      this.$imagePreview({ images: [image] })
     },
   },
 
@@ -420,7 +427,6 @@ export default {
         }
         return ''
       })
-      console.log(this.filterTableColumn)
     },
     fixedRightList() {
       this.filterTableColumn.map((item, index) => {
@@ -431,7 +437,6 @@ export default {
         }
         return ''
       })
-      console.log(this.filterTableColumn)
     },
     // 监听选择列变化
     checkList() {
@@ -443,7 +448,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .tableSample {
   padding: 0 0 30px;
 
@@ -541,16 +546,16 @@ export default {
     justify-content: flex-start;
     flex-direction: row;
 
-    img {
+    .summary-img {
       width: 325px;
       height: 250px;
     }
 
-    .demo-table-expand {
+    .table-expand {
       font-size: 0;
       margin-left: 30px;
-      display: flex;
-      flex-direction: column;
+      // display: flex;
+      // flex-direction: column;
 
       label {
         width: 90px;
@@ -559,9 +564,14 @@ export default {
 
       .el-form-item {
         margin-right: 0;
-        margin-bottom: 0;
-        display: flex;
-        flex-direction: row;
+        margin-bottom: 0px !important;
+        width: 500px;
+        // display: flex;
+        // flex-direction: row;
+
+        .form-item {
+          white-space: pre-wrap;
+        }
       }
     }
   }
@@ -573,16 +583,16 @@ export default {
   }
 }
 // dialog
-.tableSample /deep/ .el-dialog__footer {
+.tableSample >>> .el-dialog__footer {
   text-align: left;
   padding-left: 30px;
 }
 
-.tableSample /deep/ .el-dialog__header {
+.tableSample >>> .el-dialog__header {
   padding-left: 30px;
 }
 
-.tableSample /deep/ .el-dialog__body {
+.tableSample >>> .el-dialog__body {
   padding: 30px;
 }
 </style>

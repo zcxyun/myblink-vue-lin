@@ -2,9 +2,9 @@ export const tableColumn = [
   // { prop: 'sorting', label: '排序', noRepeat: true },
   // { prop: 'rank', label: '排名' },
   {
-    prop: 'img_url', label: '封面', width: 100, readOnly: true,
+    prop: 'img_url', label: '图片', width: 100,
   },
-  { prop: 'title', label: '标题', width: 300 },
+  { prop: 'title', label: '标题' },
   // { prop: 'originalTitle', label: '原名', width: 150 },
   // {
   //   prop: 'rating', label: '评分', noRepeat: true, width: 100,
@@ -14,7 +14,7 @@ export const tableColumn = [
   // { prop: 'casts', label: '主演', width: 150 },
   // { prop: 'year', label: '年份' },
   // { prop: 'recommend', label: '推荐', noRepeat: true },
-  { prop: 'summary', label: '摘要', width: 400 },
+  { prop: 'summary', label: '摘要' },
 ]
 
 export const operate = [

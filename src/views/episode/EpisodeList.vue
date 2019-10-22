@@ -4,6 +4,7 @@
       v-if="!showEdit"
       :loading="loading"
       :title="title"
+      showExtend
       :searchPlaceHolder="searchPlaceHolder"
       :tableData="tableData"
       :tableColumn="tableColumn"
