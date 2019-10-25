@@ -1,9 +1,8 @@
 export const tableColumn = [
   // { prop: 'sorting', label: '排序', noRepeat: true },
   // { prop: 'rank', label: '排名' },
-  {
-    prop: 'img_url', label: '图片', width: 100,
-  },
+  { prop: 'img_url', label: '图片', width: 100 },
+  { prop: '_is_classic', label: '加入期刊', width: 90 },
   { prop: 'title', label: '标题' },
   // { prop: 'originalTitle', label: '原名', width: 150 },
   // {

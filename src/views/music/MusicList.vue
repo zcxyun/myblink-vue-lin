@@ -4,6 +4,7 @@
       v-if="!showEdit"
       :loading="loading"
       showExtend
+      showSearch
       :title="title"
       :searchPlaceHolder="searchPlaceHolder"
       :tableData="tableData"
@@ -16,6 +17,7 @@
       @page-change="onPageChange"
       @edit="onEdit"
       @delete="onDelete"
+      @switchStatus="onSwitch"
       @search="onSearch"
     ></z-table>
     <music-info
@@ -29,6 +31,8 @@
 
 <script>
 import music from '@/models/music.js'
+import classic from '@/models/classic.js'
+import { ClassicType } from '@/libs/enum.js'
 import MusicInfo from './MusicInfo'
 import { tableColumn, operate } from './data.js'
 import ZTable from '@/components/base/table/z-table'
@@ -63,16 +67,17 @@ export default {
   methods: {
     // 获取数据
     async _getTableData() {
-      const page = this.currentPage - 1
+      const page = this.currentPage
       const count = this.pageCount
       const q = this.searchKeyword.trim()
       try {
         this.loading = true
-        const { total, musics } = await music.getMusics(page, count, q)
-        this.tableData = musics
+        const { total, models } = await music.getMusics(page, count, q)
+        this.tableData = models
         this.total = total
       } catch (err) {
         this.tableData = []
+        this.total = 0
         console.log(err)
       }
       this.loading = false
@@ -125,6 +130,29 @@ export default {
       }).catch(() => {
         this.$message.warning('已取消删除')
       })
+    },
+    // 切换是否加入期刊
+    async onSwitch({ row, val }) {
+      this.loading = true
+      const data = {
+        classic_id: row.id,
+        type: ClassicType.MUSIC,
+      }
+      let res = null
+      try {
+        if (val) {
+          res = await classic.addClassic(data)
+        } else {
+          res = await classic.deleteClassic(data)
+        }
+        if (res && res.error_code === 0) {
+          this.$message.success(res.msg)
+        }
+      } catch (err) {
+        console.log(err)
+      }
+      this._getTableData()
+      this.loading = false
     },
     // 搜索
     onSearch(query) {

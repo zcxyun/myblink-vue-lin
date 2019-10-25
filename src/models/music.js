@@ -12,7 +12,7 @@ class Music {
     return res
   }
 
-  async getMusics(page = 0, count = 1, q = null) {
+  async getMusics(page = 1, count = 1, q = null) {
     const info = { page, count }
     if (q) {
       info.q = q

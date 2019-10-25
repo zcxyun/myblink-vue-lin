@@ -7,7 +7,7 @@
           <p class="title">{{title}}</p>
         </div>
         <div class="header-right">
-          <lin-search @query="onQueryChange" :placeholder="searchPlaceHolder"/>
+          <lin-search @query="onQueryChange" :placeholder="searchPlaceHolder" v-if="showSearch"/>
           <div style="margin-left:30px">
             <el-button type="primary" @click="dialogTableVisible=!dialogTableVisible">列操作</el-button>
           </div>
@@ -80,7 +80,7 @@
                     <el-form-item
                       :label="column.label"
                       :key="column.label"
-                      v-else-if="column.label !== '图片' && row[column.prop].value">
+                      v-else-if="column.label !== '图片' && column.label !== '加入期刊' && row[column.prop].value">
                       <div class="form-item">       {{ row[column.prop].value }}</div>
                     </el-form-item>
                   </template>
@@ -90,16 +90,21 @@
           </el-table-column>
           <!-- 开始循环 -->
           <template v-for="column in filterTableColumn">
-            <!-- 推荐 -->
-            <!-- <el-table-column label="推荐" v-if="column.label === '推荐'" :key="column.label">
+            <!-- 加入期刊 -->
+            <el-table-column
+              :label="column.label"
+              v-if="column.label === '加入期刊'"
+              :key="column.label"
+              :fixed="column.fixed ? column.fixed : false"
+              :width="column.width ? column.width : ''">
               <template #default="{row}">
                 <el-switch
-                  v-model=""
+                  v-model="row[column.prop].value"
                   active-color="#3963bc"
-                  @change="onSwitch()"
+                  @change="onSwitch(row, row[column.prop].value)"
                 ></el-switch>
               </template>
-            </el-table-column> -->
+            </el-table-column>
             <!-- 自定义排序 -->
             <!-- <el-table-column label="排序" v-if="item.label === '排序'" v-bind:key="item.label">
               <template slot-scope="props">
@@ -114,11 +119,10 @@
             <!-- 首列图片 -->
             <el-table-column
               :key="column.label"
-              v-if="column.label === '图片'"
+              v-else-if="column.label === '图片'"
               :label="column.label"
               :fixed="column.fixed ? column.fixed : false"
-              :width="column.width ? column.width : ''"
-            >
+              :width="column.width ? column.width : ''">
               <template #default="{row}">
                 <el-image
                   :src="row[column.prop].value"
@@ -227,6 +231,7 @@ export default {
   },
   props: {
     title: String,
+    showSearch: Boolean,
     searchPlaceHolder: String,
     loading: Boolean,
     tableData: Array,
@@ -304,22 +309,17 @@ export default {
 
     onRowDbClick(val) {
       // console.log(val)
-      this.$emit('row-click', val)
+      this.$emit('row-db-click', val)
     },
 
     // 变更排序
-    onSort(val, rowData) {
-      // console.log('rowData', rowData)
-      this.$message({
-        type: 'success',
-        message: `排序已更改为：${val}`,
-      })
-    },
+    // onSort(val) {
+    // },
 
     // 切换状态
-    onSwitch(val, rowData) {
-      this.loading = true
-      // console.log(val, rowData)
+    onSwitch(row, val) {
+      const data = this._revertSingleData(row)
+      this.$emit('switchStatus', { row: data, val })
     },
 
     onExpandChange(row, expandedRows) {

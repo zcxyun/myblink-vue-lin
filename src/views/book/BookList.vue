@@ -4,6 +4,7 @@
       :loading="loading"
       :title="title"
       showExtend
+      showSearch
       :searchPlaceHolder="searchPlaceHolder"
       :tableData="tableData"
       :tableColumn="tableColumn"
@@ -76,9 +77,9 @@ export default {
     },
 
     arr2Str(books) {
-      books.forEach((book) => {
-        book.author = book.author.join(',')
-        book.translator = book.translator.join(',')
+      books.forEach((item) => {
+        item.author = item.author.join(',')   // eslint-disable-line
+        item.translator = item.translator.join(',') // eslint-disable-line
       })
     },
 

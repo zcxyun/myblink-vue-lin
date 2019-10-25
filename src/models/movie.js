@@ -12,7 +12,7 @@ class Movie {
     return res
   }
 
-  async getMovies(page = 0, count = 1, q = null) {
+  async getMovies(page = 1, count = 1, q = null) {
     const info = { page, count }
     if (q) {
       info.q = q
