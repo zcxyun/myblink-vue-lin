@@ -51,9 +51,9 @@ export default {
           this.currentPage, this.pageCount,
         )
         const strType = { 100: '电影', 200: '音乐', 300: '句子' }
-        models.forEach(model => {
-          model.type = strType[model.type]
-        });
+        models.forEach((model) => {
+          model.type = strType[model.type]  // eslint-disable-line
+        })
         this.tableData = models
         this.total = total
       } catch (err) {
@@ -67,7 +67,7 @@ export default {
     // 切换是否加入期刊
     async onSwitch({ row, val }) {
       this.loading = true
-      const intType = {'电影': 100, '音乐': 200, '句子': 300 }
+      const intType = { '电影': 100, '音乐': 200, '句子': 300 } // eslint-disable-line
       const data = {
         classic_id: row.id,
         type: intType[row.type],

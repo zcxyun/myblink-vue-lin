@@ -9,8 +9,12 @@ class Member {
     return res
   }
 
-  async getMembers() {
-    const res = await get('cms/member')
+  async getMembers(page = 1, count = 15, q = '') {
+    const info = { page, count }
+    if (q) {
+      info.q = q
+    }
+    const res = await get('cms/member', info)
     return res
   }
 }

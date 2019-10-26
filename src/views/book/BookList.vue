@@ -59,7 +59,7 @@ export default {
   methods: {
     // 获取数据
     async _getTableData() {
-      const page = this.currentPage - 1
+      const page = this.currentPage
       const count = this.pageCount
       const q = this.searchKeyword.trim()
       try {
