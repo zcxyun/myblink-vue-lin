@@ -29,7 +29,7 @@
                 show-word-limit
               ></el-input>
             </el-form-item>
-            <el-form-item label="主图" prop="img_url">
+            <el-form-item label="主图" prop="image">
               <upload-imgs
                 ref="uploadEle"
                 :value="imgInitData"
@@ -126,12 +126,12 @@ export default {
       const origin = this.originInfo  // eslint-disable-line
       this.form.title = origin.title || ''
       this.form.summary = origin.summary || ''
-      if (origin.img_id && origin.img_url) {
+      if (origin.img_id && origin.image) {
         this.imgInitData.splice(0)
         this.imgInitData.push({
           id: origin.img_id,
           imgId: origin.img_id,
-          display: origin.img_url,
+          display: origin.image,
         })
       }
     },

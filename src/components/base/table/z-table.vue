@@ -145,16 +145,6 @@
                 </el-link>
               </template>
             </el-table-column>
-            <!-- 排序 评分 -->
-            <!-- <el-table-column
-              label="评分"
-              :prop="item.prop"
-              sortable
-              v-bind:key="item.label"
-              :fixed="item.fixed ? item.fixed : false"
-              :width="item.width ? item.width : ''"
-              v-if="item.label === '评分'"
-            ></el-table-column> -->
             <!-- 单元格编辑 -->
             <el-table-column
               v-else
@@ -265,6 +255,7 @@ export default {
       this.cellEditing = false // eslint-disable-line
       // 处理原表格数据, 使每个要显示的cell数据项等于{value: 原数据值, editFlag: false}
       let data = []
+      // console.log(this.tableData)
       if (Array.isArray(this.tableData)) {
         data = utils.deepClone(this.tableData)
         data.forEach((item) => {

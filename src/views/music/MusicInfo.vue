@@ -166,22 +166,22 @@ export default {
     },
     setImgInfo() {
       const origin = this.originInfo  // eslint-disable-line
-      if (origin.img_id && origin.img_url) {
+      if (origin.img_id && origin.image) {
         this.imgInitData.splice(0) // 重置时先清空, 要不然会越来越多~_~
         this.imgInitData.push({
           id: origin.img_id,
           imgId: origin.img_id,
-          display: origin.img_url,
+          display: origin.image,
         })
       }
     },
     setVoiceInfo() {
       const origin = this.originInfo  // eslint-disable-line
-      if (origin.title && origin.voice_url && origin.voice_id) {
+      if (origin.title && origin.voice && origin.voice_id) {
         this.voiceList.splice(0) // 重置时先清空, 要不然会越来越多~_~
         this.voiceList.push({
           name: origin.title,
-          url: origin.voice_url,
+          url: origin.voice,
         })
         this.voiceId = origin.voice_id
       }

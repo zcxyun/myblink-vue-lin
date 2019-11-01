@@ -1,8 +1,8 @@
 export const tableColumn = [
   // { prop: 'sorting', label: '排序', noRepeat: true },
   // { prop: 'rank', label: '排名' },
-  { prop: 'img_url', label: '图片', width: 100 },
-  { prop: '_is_classic', label: '加入期刊', width: 90 },
+  { prop: 'image', label: '图片', width: 100 },
+  { prop: 'is_classic', label: '加入期刊', width: 90 },
   { prop: 'title', label: '标题' },
   // { prop: 'originalTitle', label: '原名', width: 150 },
   // {
@@ -14,7 +14,7 @@ export const tableColumn = [
   // { prop: 'year', label: '年份' },
   // { prop: 'recommend', label: '推荐', noRepeat: true },
   { prop: 'summary', label: '摘要' },
-  { prop: 'voice_url', label: '音乐' },
+  { prop: 'voice', label: '音乐' },
 ]
 
 export const operate = [
