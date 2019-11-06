@@ -4,19 +4,24 @@
       :loading="loading"
       :title="title"
       showExtend
+      showSearch
+      showSearchTypes
+      :searchPlaceHolder="searchPlaceHolder"
       :tableData="tableData"
       :tableColumn="tableColumn"
       :currentPage="currentPage"
       :pageCount="pageCount"
       :total="total"
+      :searchTypes="searchTypes"
       @page-change="onPageChange"
-      @switchStatus="onSwitch"
+      @search="onSearch"
+      @choose-search-type="onChooseSearchType"
     ></z-table>
   </div>
 </template>
 
 <script>
-import classic from '@/models/classic.js'
+import comment from '@/models/comment.js'
 import { tableColumn } from './data.js'
 import ZTable from '@/components/base/table/z-table'
 
@@ -26,11 +31,14 @@ export default {
   },
   data() {
     return {
-      title: '期刊列表',
+      searchPlaceHolder: '请输入标题',
+      title: '评论列表',
       tableData: [],
       tableColumn,
       loading: false,
-      // searchKeyword: '',
+      searchKeyword: '',
+      searchTypes: null,
+      currentSearchType: 100,
       // 分页相关
       currentPage: 1, // 默认获取第一页的数据
       pageCount: 2, // 每页10条数据
@@ -44,16 +52,15 @@ export default {
   methods: {
     // 获取数据
     async _getTableData() {
-      // const q = this.searchKeyword.trim()
+      const q = this.searchKeyword.trim()
+      this.searchTypes = { 100: '电影', 200: '音乐', 300: '句子', 400: '书籍' } // eslint-disable-line
       try {
         this.loading = true
-        const { total, models } = await classic.getClassics(
-          this.currentPage, this.pageCount,
+        const { total, models } = await comment.getComments(
+          this.currentPage, this.pageCount, q, this.currentSearchType,
         )
-        // console.log(models)
-        const strType = { 100: '电影', 200: '音乐', 300: '句子' }
         models.forEach((model) => {
-          model.type = strType[model.type]  // eslint-disable-line
+          model.type = this.searchTypes[model.type]  // eslint-disable-line
         })
         this.tableData = models
         this.total = total
@@ -65,33 +72,22 @@ export default {
       this.loading = false
     },
 
-    // 切换是否加入期刊
-    async onSwitch({ row, val }) {
-      this.loading = true
-      const intType = { '电影': 100, '音乐': 200, '句子': 300 } // eslint-disable-line
-      const data = {
-        classic_id: row.id,
-        type: intType[row.type],
-      }
-      let res = null
-      try {
-        if (val) {
-          res = await classic.addClassic(data)
-        } else {
-          res = await classic.deleteClassic(data)
-        }
-        if (res && res.error_code === 0) {
-          this.$message.success(res.msg)
-        }
-      } catch (err) {
-        console.log(err)
-      }
+    // 选择搜索类型
+    onChooseSearchType(type) {
+      this.currentSearchType = type
       this._getTableData()
-      this.loading = false
     },
+
     // 切换分页
     async onPageChange(val) {
       this.currentPage = val
+      this._getTableData()
+    },
+
+    // 搜索
+    onSearch(query) {
+      this.currentPage = 1
+      this.searchKeyword = query
       this._getTableData()
     },
   },

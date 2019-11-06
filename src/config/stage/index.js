@@ -5,6 +5,7 @@ import musicConfig from './music'
 import episodeConfig from './episode'
 import memberConfig from './member'
 import classicConfig from './classic'
+import commentConfig from './comment'
 import pluginsConfig from './plugins'
 import Utils from '@/lin/utils/util'
 
@@ -47,6 +48,7 @@ let homeRouter = [
   episodeConfig,
   memberConfig,
   classicConfig,
+  commentConfig,
 ]
 
 const plugins = [...pluginsConfig]

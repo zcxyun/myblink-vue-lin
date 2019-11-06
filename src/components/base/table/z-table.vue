@@ -7,6 +7,17 @@
           <p class="title">{{title}}</p>
         </div>
         <div class="header-right">
+          <el-dropdown style="margin-right: 20px;" v-if="showSearchTypes" @command="chooseSearchType">
+            <el-button type="primary">
+              类型<i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item
+              v-for="(value, key) in searchTypes"
+              :command="key"
+              :key="key">{{value}}</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
           <lin-search @query="onQueryChange" :placeholder="searchPlaceHolder" v-if="showSearch"/>
           <div style="margin-left:30px">
             <el-button type="primary" @click="dialogTableVisible=!dialogTableVisible">列操作</el-button>
@@ -222,6 +233,8 @@ export default {
   props: {
     title: String,
     showSearch: Boolean,
+    showSearchTypes: Boolean,
+    searchTypes: Object,
     searchPlaceHolder: String,
     loading: Boolean,
     tableData: Array,
@@ -301,6 +314,10 @@ export default {
     onRowDbClick(val) {
       // console.log(val)
       this.$emit('row-db-click', val)
+    },
+
+    chooseSearchType(type) {
+      this.$emit('choose-search-type', type)
     },
 
     // 变更排序
