@@ -36,7 +36,7 @@ export default {
       searchKeyword: '',
       // 分页相关
       currentPage: 1, // 默认获取第一页的数据
-      pageCount: 2, // 每页10条数据
+      pageCount: 10, // 每页10条数据
       total: 0, // 分组内的用户总数
     }
   },

@@ -6,6 +6,7 @@
       showExtend
       showSearch
       showSearchTypes
+      :currentSearchType="searchTypes[currentSearchType]"
       :searchPlaceHolder="searchPlaceHolder"
       :tableData="tableData"
       :tableColumn="tableColumn"
@@ -37,11 +38,11 @@ export default {
       tableColumn,
       loading: false,
       searchKeyword: '',
-      searchTypes: null,
+      searchTypes: { 100: '电影', 200: '音乐', 300: '句子', 400: '书籍' },  // eslint-disable-line
       currentSearchType: 100,
       // 分页相关
       currentPage: 1, // 默认获取第一页的数据
-      pageCount: 2, // 每页10条数据
+      pageCount: 10, // 每页10条数据
       total: 0, // 分组内的用户总数
     }
   },
@@ -53,7 +54,6 @@ export default {
     // 获取数据
     async _getTableData() {
       const q = this.searchKeyword.trim()
-      this.searchTypes = { 100: '电影', 200: '音乐', 300: '句子', 400: '书籍' } // eslint-disable-line
       try {
         this.loading = true
         const { total, models } = await comment.getComments(

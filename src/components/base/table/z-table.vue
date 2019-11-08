@@ -9,7 +9,7 @@
         <div class="header-right">
           <el-dropdown style="margin-right: 20px;" v-if="showSearchTypes" @command="chooseSearchType">
             <el-button type="primary">
-              类型<i class="el-icon-arrow-down el-icon--right"></i>
+              {{currentSearchType}}<i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item
@@ -235,6 +235,7 @@ export default {
     showSearch: Boolean,
     showSearchTypes: Boolean,
     searchTypes: Object,
+    currentSearchType: String,
     searchPlaceHolder: String,
     loading: Boolean,
     tableData: Array,
